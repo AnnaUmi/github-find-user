@@ -1,18 +1,15 @@
 import React, { useState, Fragment } from "react";
 import axios from "axios";
-import { Provider as ReduxProvider } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import configureStore from "./components/test/store";
 import Search from "./components/users/Search";
 import Alert from "./components/layout/Alert";
 import Navbar from "./components/layout/Navbar";
 import Users from "./components/users/Users";
 import About from "./components/pages/About";
 import User from "./components/users/User";
+import GithubState from "./context/github/GithubState";
 
 import "./App.css";
-
-const reduxStore = configureStore(window.REDUX_INITIAL_DATA);
 
 const App = () => {
   const [users, setUsers] = useState([]);
@@ -31,14 +28,7 @@ const App = () => {
   // );
   //  this.setState({ users: res.data, loading: false });
   //  }
-  const searchUsers = async value => {
-    setLoading(true);
-    const res = await axios.get(
-      `https://api.github.com/search/users?q=${value}`
-    );
-    setUsers(res.data.items);
-    setLoading(false);
-  };
+ 
 
   const getUser = async username => {
     setLoading(true);
@@ -59,13 +49,13 @@ const App = () => {
     setLoading(false);
   };
   const setAlert = (text, style) => {
-    setAlertState(text, style);
+    setAlertState({ text, style });
     setTimeout(() => setAlertState(null), 3000);
   };
 
   return (
-    <Router>
-      <ReduxProvider store={reduxStore}>
+    <GithubState>
+      <Router>
         <div className="App">
           <Navbar />
           <div className="container">
@@ -76,13 +66,12 @@ const App = () => {
                 render={props => (
                   <Fragment>
                     <Search
-                      searchUsers={searchUsers}
                       showClean={users.length > 0 ? true : false}
                       cleanUsers={cleanUsers}
                       setAlert={setAlert}
                     />
 
-                    <Users users={users} loading={loading} />
+                    <Users />
                   </Fragment>
                 )}
               />
@@ -105,8 +94,8 @@ const App = () => {
             {alert && <Alert alert={alert} />}
           </div>
         </div>
-      </ReduxProvider>
-    </Router>
+      </Router>
+    </GithubState>
   );
 };
 
